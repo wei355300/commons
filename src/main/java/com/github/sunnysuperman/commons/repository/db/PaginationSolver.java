@@ -6,7 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.github.sunnysuperman.commons.utils.Pagination;
+import com.github.sunnysuperman.commons.model.Pagination;
 
 public class PaginationSolver<ItemIDType, ItemType> {
 	private int index = 0;

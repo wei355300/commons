@@ -2,6 +2,8 @@ package com.github.sunnysuperman.commons.utils;
 
 import java.util.UUID;
 
+import com.github.sunnysuperman.commons.model.ObjectId;
+
 public class UUIDUtil {
 
 	public static String genUUID() {

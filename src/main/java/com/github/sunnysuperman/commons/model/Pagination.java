@@ -1,4 +1,4 @@
-package com.github.sunnysuperman.commons.utils;
+package com.github.sunnysuperman.commons.model;
 
 import java.util.ArrayList;
 import java.util.Collection;

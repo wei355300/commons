@@ -4,7 +4,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import junit.framework.TestCase;
 
-import com.github.sunnysuperman.commons.utils.ObjectId;
+import com.github.sunnysuperman.commons.model.ObjectId;
 
 public class ObjectIdTest extends TestCase {
 

@@ -18,9 +18,9 @@ import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.sunnysuperman.commons.model.Pagination;
 import com.github.sunnysuperman.commons.repository.RepositoryException;
 import com.github.sunnysuperman.commons.utils.FormatUtil;
-import com.github.sunnysuperman.commons.utils.Pagination;
 import com.github.sunnysuperman.commons.utils.StringUtil;
 
 public class JdbcTemplate {
