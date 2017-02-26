@@ -381,24 +381,4 @@ public class JdbcTemplate {
 		return find(getPageDialect(sql, offset, limit), params, new SetHandler<T>(handler, limit));
 	}
 
-	// TODO XXX
-	public <T> Pagination<T> findPaged(String sql, String count_sql, Object[] params, final int offset,
-			final int limit, ListHandler<T> handler) throws RepositoryException {
-		List<T> items = find(getPageDialect(sql, offset, limit), params, handler);
-		int records = items.size();
-		if (records == 0) {
-			return new Pagination<T>();
-		}
-		if (offset != 0 || records == limit) {
-			records = count(count_sql, params);
-		}
-		return new Pagination<T>(items, records, offset, limit);
-	}
-
-	// TODO XXX
-	public <T> List<T> findList(String sql, Object[] params, final int offset, final int limit, ListHandler<T> handler)
-			throws RepositoryException {
-		return find(getPageDialect(sql, offset, limit), params, handler);
-	}
-
 }

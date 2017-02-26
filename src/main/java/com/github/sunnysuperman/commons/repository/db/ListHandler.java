@@ -38,9 +38,4 @@ public class ListHandler<T> implements Handler<List<T>> {
 		return list;
 	}
 
-	// TODO XXX
-	public static <T> ListHandler<T> newInstance(RowHandler<T> t) {
-		return new ListHandler<T>(t);
-	}
-
 }
