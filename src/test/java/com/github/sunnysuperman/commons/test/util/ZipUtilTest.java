@@ -1,4 +1,4 @@
-package com.github.sunnysuperman.commons.test;
+package com.github.sunnysuperman.commons.test.util;
 
 import java.io.File;
 

@@ -1,24 +1,20 @@
-package com.github.sunnysuperman.commons.test;
+package com.github.sunnysuperman.commons.test.locale;
 
 import java.io.File;
-import java.util.Date;
-import java.util.Map;
 
 import junit.framework.TestCase;
 
 import com.github.sunnysuperman.commons.locale.ClassPathPropertiesLocaleBundle;
-import com.github.sunnysuperman.commons.locale.DBLocaleBundle;
-import com.github.sunnysuperman.commons.locale.ExcelLocaleBundle;
-import com.github.sunnysuperman.commons.locale.FileSystemPropertiesLocaleBundle;
 import com.github.sunnysuperman.commons.locale.ClassPathPropertiesLocaleBundle.ClassPathPropertiesLocaleBundleOptions;
+import com.github.sunnysuperman.commons.locale.DBLocaleBundle;
 import com.github.sunnysuperman.commons.locale.DBLocaleBundle.DBLocaleBundleOptions;
+import com.github.sunnysuperman.commons.locale.ExcelLocaleBundle;
 import com.github.sunnysuperman.commons.locale.ExcelLocaleBundle.ExcelLocaleBundleOptions;
+import com.github.sunnysuperman.commons.locale.FileSystemPropertiesLocaleBundle;
 import com.github.sunnysuperman.commons.locale.FileSystemPropertiesLocaleBundle.FileSystemPropertiesLocaleBundleOptions;
-import com.github.sunnysuperman.commons.repository.db.DBUtil;
-import com.github.sunnysuperman.commons.repository.db.JdbcTemplate;
+import com.github.sunnysuperman.commons.model.TimeSerializeType;
 import com.github.sunnysuperman.commons.test.BaseTest.TestDB;
 import com.github.sunnysuperman.commons.utils.CollectionUtil;
-import com.github.sunnysuperman.commons.utils.JSONUtil;
 
 public class LocaleBundleTest extends TestCase {
 
@@ -83,7 +79,7 @@ public class LocaleBundleTest extends TestCase {
 		options.setPrefLocales(new String[] { "zh_CN", "en_US" });
 		options.setJdbcTemplate(TestDB.getJdbcTemplate());
 		options.setTableName("api_localebundle");
-		options.setUpdatedAtSerializeType("char");
+		options.setUpdatedAtSerializeType(TimeSerializeType.Long);
 		options.setReloadSeconds(6);
 		DBLocaleBundle bundle = new DBLocaleBundle(options);
 		String key = "age.male.3";
@@ -91,13 +87,6 @@ public class LocaleBundleTest extends TestCase {
 			printValue(bundle.getRaw("zh_CN", key));
 			Thread.sleep(5000);
 		}
-	}
-
-	public void testDBLocaleBundleUpdate() throws Exception {
-		JdbcTemplate template = TestDB.getJdbcTemplate();
-		Map<String, Object> value = CollectionUtil.arrayAsMap("zh_CN", "男神", "en_US", "\\s");
-		template.update("update api_localebundle set v=?,updated_at=? where id=?",
-				new Object[] { JSONUtil.toJSONString(value), DBUtil.date2fixChars(new Date()), "age.male.3" });
 	}
 
 	public void testExcelLocaleBundle() throws Exception {

@@ -4,8 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class Pagination<T> implements java.io.Serializable {
-
+public class Pagination<T> {
 	public static final int DEFAULT_PAGESIZE = 10;
 
 	public static <T> Pagination<T> getEmptyInstance() {

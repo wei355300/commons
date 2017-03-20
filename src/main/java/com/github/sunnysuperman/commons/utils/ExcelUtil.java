@@ -259,6 +259,7 @@ public class ExcelUtil {
 	}
 
 	public static class ExcelException extends Exception {
+		private static final long serialVersionUID = 1170540747666980151L;
 		public static final int ERROR_NOT_AN_EXCEL_FILE = 1;
 		public static final int ERROR_DATA_IS_EMPTY = 2;
 		public static final int ERROR_COULD_NOT_FIND_COLUMN = 3;

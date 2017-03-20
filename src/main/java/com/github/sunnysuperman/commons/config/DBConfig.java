@@ -11,6 +11,7 @@ import java.util.TimerTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.sunnysuperman.commons.model.TimeSerializeType;
 import com.github.sunnysuperman.commons.repository.RepositoryException;
 import com.github.sunnysuperman.commons.repository.db.JdbcTemplate;
 import com.github.sunnysuperman.commons.repository.db.MapHandler;
@@ -24,8 +25,6 @@ import com.github.sunnysuperman.commons.utils.JSONUtil;
  *
  */
 public class DBConfig extends ByteStoredConfig {
-	public static final String DATETYPE_DATE = "date";
-	public static final String DATETYPE_TIMESTAMP = "timestamp";
 	private static final Logger LOGGER = LoggerFactory.getLogger(DBConfig.class);
 
 	protected DBConfigOptions options;
@@ -46,7 +45,7 @@ public class DBConfig extends ByteStoredConfig {
 		private String valueColumn;
 		private String typeColumn;
 		private String updatedAtColumn;
-		private String updatedAtSerializeType;
+		private TimeSerializeType updatedAtSerializeType;
 		private boolean typeUndeclared;
 		private String defaultType;
 		private boolean loadOnInit;
@@ -127,11 +126,11 @@ public class DBConfig extends ByteStoredConfig {
 			this.reloadSecondsKey = reloadSecondsKey;
 		}
 
-		public String getUpdatedAtSerializeType() {
+		public TimeSerializeType getUpdatedAtSerializeType() {
 			return updatedAtSerializeType;
 		}
 
-		public void setUpdatedAtSerializeType(String updatedAtSerializeType) {
+		public void setUpdatedAtSerializeType(TimeSerializeType updatedAtSerializeType) {
 			this.updatedAtSerializeType = updatedAtSerializeType;
 		}
 
@@ -193,7 +192,7 @@ public class DBConfig extends ByteStoredConfig {
 			options.setUpdatedAtColumn("updated_at");
 		}
 		if (options.getUpdatedAtSerializeType() == null) {
-			options.setUpdatedAtSerializeType(DATETYPE_DATE);
+			throw new IllegalArgumentException("updatedAtSerializeType");
 		}
 		if (options.getKeyFilter() == null) {
 			options.setKeyFilter(new AllConfigKeyFilter());
@@ -280,10 +279,10 @@ public class DBConfig extends ByteStoredConfig {
 	}
 
 	private Object serializeUpdatedAt(Date date) {
-		String type = options.getUpdatedAtSerializeType();
-		if (type == null || type.equals(DATETYPE_DATE)) {
+		TimeSerializeType type = options.getUpdatedAtSerializeType();
+		if (type == TimeSerializeType.Date) {
 			return date;
-		} else if (type.equals(DATETYPE_TIMESTAMP)) {
+		} else if (type.equals(TimeSerializeType.Long)) {
 			return date.getTime();
 		} else {
 			throw new RuntimeException("Bad updatedAt type: " + type);
@@ -291,10 +290,10 @@ public class DBConfig extends ByteStoredConfig {
 	}
 
 	private Date deserializeUpdatedAt(Object v) {
-		String type = options.getUpdatedAtSerializeType();
-		if (type == null || type.equals(DATETYPE_DATE)) {
+		TimeSerializeType type = getOptions().getUpdatedAtSerializeType();
+		if (type == TimeSerializeType.Date) {
 			return (Date) v;
-		} else if (type.equals(DATETYPE_TIMESTAMP)) {
+		} else if (type.equals(TimeSerializeType.Long)) {
 			return new Date(FormatUtil.parseLong(v));
 		} else {
 			throw new RuntimeException("Bad updatedAt type: " + type);

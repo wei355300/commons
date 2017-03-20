@@ -12,8 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.sunnysuperman.commons.config.ConfigKeyFilter;
+import com.github.sunnysuperman.commons.model.TimeSerializeType;
 import com.github.sunnysuperman.commons.repository.RepositoryException;
-import com.github.sunnysuperman.commons.repository.db.DBUtil;
 import com.github.sunnysuperman.commons.repository.db.JdbcTemplate;
 import com.github.sunnysuperman.commons.repository.db.MapHandler;
 import com.github.sunnysuperman.commons.utils.ByteUtil;
@@ -29,7 +29,7 @@ public class DBLocaleBundle extends LocaleBundle {
 		private String keyColumn;
 		private String valueColumn;
 		private String updatedAtColumn;
-		private String updatedAtSerializeType;
+		private TimeSerializeType updatedAtSerializeType;
 		private int reloadSeconds;
 		private ConfigKeyFilter keyFilter;
 
@@ -49,11 +49,11 @@ public class DBLocaleBundle extends LocaleBundle {
 			this.tableName = tableName;
 		}
 
-		public String getUpdatedAtSerializeType() {
+		public TimeSerializeType getUpdatedAtSerializeType() {
 			return updatedAtSerializeType;
 		}
 
-		public void setUpdatedAtSerializeType(String updatedAtSerializeType) {
+		public void setUpdatedAtSerializeType(TimeSerializeType updatedAtSerializeType) {
 			this.updatedAtSerializeType = updatedAtSerializeType;
 		}
 
@@ -105,6 +105,9 @@ public class DBLocaleBundle extends LocaleBundle {
 
 	public DBLocaleBundle(final DBLocaleBundleOptions options) {
 		super(options);
+		if (options.getUpdatedAtSerializeType() == null) {
+			throw new IllegalArgumentException("updatedAtSerializeType");
+		}
 		if (StringUtil.isEmpty(options.getKeyColumn())) {
 			options.setKeyColumn("id");
 		}
@@ -155,26 +158,22 @@ public class DBLocaleBundle extends LocaleBundle {
 	}
 
 	private Object serializeUpdatedAt(Date date) {
-		String type = getOptions().getUpdatedAtSerializeType();
-		if (type == null || type.equals("timestamp")) {
+		TimeSerializeType type = getOptions().getUpdatedAtSerializeType();
+		if (type == TimeSerializeType.Date) {
 			return date;
-		} else if (type.equals("long")) {
+		} else if (type.equals(TimeSerializeType.Long)) {
 			return date.getTime();
-		} else if (type.equals("char")) {
-			return DBUtil.date2fixChars(date);
 		} else {
 			throw new RuntimeException("Bad updatedAt type: " + type);
 		}
 	}
 
 	private Date deserializeUpdatedAt(Object v) {
-		String type = getOptions().getUpdatedAtSerializeType();
-		if (type == null || type.equals("timestamp")) {
+		TimeSerializeType type = getOptions().getUpdatedAtSerializeType();
+		if (type == TimeSerializeType.Date) {
 			return (Date) v;
-		} else if (type.equals("long")) {
+		} else if (type.equals(TimeSerializeType.Long)) {
 			return new Date(FormatUtil.parseLong(v));
-		} else if (type.equals("char")) {
-			return DBUtil.fixChars2date(FormatUtil.parseString(v));
 		} else {
 			throw new RuntimeException("Bad updatedAt type: " + type);
 		}

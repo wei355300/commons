@@ -1,40 +1,44 @@
 package com.github.sunnysuperman.commons.repository.db;
 
-import java.lang.reflect.ParameterizedType;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
 
-import com.github.sunnysuperman.commons.utils.BeanUtil;
-import com.github.sunnysuperman.commons.utils.BeanUtil.ParseBeanOptions;
+import com.github.sunnysuperman.commons.bean.Bean;
+import com.github.sunnysuperman.commons.bean.ParseBeanOptions;
 
-public abstract class BeanHandler<T> extends RowHandler<T> {
-
+public class BeanHandler<T> extends RowHandler<T> {
 	private Class<T> clazz;
-	private ParseBeanOptions options;
+	private ParseBeanOptions parseBeanOptions;
 
-	@SuppressWarnings("unchecked")
-	public BeanHandler(ParseBeanOptions options) {
-		clazz = (Class<T>) ((ParameterizedType) (getClass().getGenericSuperclass())).getActualTypeArguments()[0];
-		this.options = options;
+	public BeanHandler(Class<T> clazz) {
+		super();
+		this.clazz = clazz;
 	}
 
-	public BeanHandler() {
-		this(null);
+	public BeanHandler(Class<T> clazz, ParseBeanOptions parseBeanOptions) {
+		this.clazz = clazz;
+		this.parseBeanOptions = parseBeanOptions;
 	}
 
 	@Override
 	public final T handleRow(ResultSet rs) throws SQLException {
 		Map<String, Object> map = MapHandler.CAMELCASE.handleRow(rs);
+		T bean = newInstance(map);
+		beforeParseBean(bean, map);
+		Bean.fromMap(map, bean, parseBeanOptions);
+		afterParseBean(bean, map);
+		return bean;
+	}
+
+	protected T newInstance(Map<String, Object> map) throws SQLException {
+		T bean;
 		try {
-			T bean = clazz.newInstance();
-			beforeParseBean(bean, map);
-			BeanUtil.map2bean(map, bean, options);
-			afterParseBean(bean, map);
-			return bean;
+			bean = clazz.newInstance();
 		} catch (Exception e) {
 			throw new SQLException(e);
 		}
+		return bean;
 	}
 
 	protected void beforeParseBean(T bean, Map<String, Object> map) {

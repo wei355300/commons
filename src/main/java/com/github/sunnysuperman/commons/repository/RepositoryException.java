@@ -1,6 +1,7 @@
 package com.github.sunnysuperman.commons.repository;
 
 public class RepositoryException extends Exception {
+	private static final long serialVersionUID = 1970461509744960226L;
 
 	public RepositoryException() {
 	}

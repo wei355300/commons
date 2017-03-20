@@ -39,8 +39,9 @@ public final class JSONUtil {
 	}
 
 	public static class ISO8601DateWithMillsSerializer implements ObjectSerializer {
+
 		@Override
-		public void write(JSONSerializer serializer, Object object, Object fieldName, Type fieldType)
+		public void write(JSONSerializer serializer, Object object, Object fieldName, Type fieldType, int features)
 				throws IOException {
 			if (object == null) {
 				serializer.getWriter().writeNull();
@@ -50,8 +51,13 @@ public final class JSONUtil {
 		}
 	}
 
+	public static String stringify(Object object) {
+		return toJSONString(object, null, SerializerFeature.DisableCircularReferenceDetect);
+	}
+
 	public static String toJSONString(Object object) {
-		return toJSONString(object, null);
+		return toJSONString(object, null, SerializerFeature.DisableCircularReferenceDetect,
+				SerializerFeature.BrowserCompatible);
 	}
 
 	public static String toJSONString(Object object, Map<Type, ObjectSerializer> serializers) {

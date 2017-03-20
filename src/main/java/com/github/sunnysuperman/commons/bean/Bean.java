@@ -1,9 +1,5 @@
-package com.github.sunnysuperman.commons.utils;
+package com.github.sunnysuperman.commons.bean;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -15,126 +11,26 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
 import com.alibaba.fastjson.JSON;
+import com.github.sunnysuperman.commons.utils.FormatUtil;
+import com.github.sunnysuperman.commons.utils.JSONUtil;
 
 /**
  * bean工具类
- * 
- * 
  *
  */
-public class BeanUtil {
+public class Bean {
 
-	/**
-	 * 注解，bean映射操作中，忽略操作的属性，通过set方法实现
-	 * 
-	 * 
-	 *
-	 */
-	@Target({ ElementType.METHOD })
-	@Retention(value = RetentionPolicy.RUNTIME)
-	public static @interface BeanIgnore {
+	public static <T> T fromMap(Map<?, ?> map, T bean) {
+		return fromMap(map, bean, null);
 	}
 
-	/**
-	 * 解析bean的结果
-	 * 
-	 * 
-	 *
-	 */
-	public static class ParseBeanResult {
-		private Object value;
-
-		public ParseBeanResult(Object value) {
-			super();
-			this.value = value;
-		}
-
-		public Object getValue() {
-			return value;
-		}
-
-	}
-
-	/**
-	 * 解析bean的拦截器
-	 * 
-	 * 
-	 *
-	 */
-	public static interface ParseBeanInterceptor {
-		ParseBeanResult parse(Object value, Class<?> destClass, ParameterizedType pType, LinkedList<String> keys);
-	}
-
-	/**
-	 * 解析bean的配置项
-	 * 
-	 * 
-	 *
-	 */
-	public static class ParseBeanOptions {
-		private ParseBeanInterceptor interceptor;
-		private LinkedList<String> contextKeys;
-
-		public ParseBeanInterceptor getInterceptor() {
-			return interceptor;
-		}
-
-		public ParseBeanOptions setInterceptor(ParseBeanInterceptor interceptor) {
-			this.interceptor = interceptor;
-			contextKeys = new LinkedList<String>();
-			return this;
-		}
-
-	}
-
-	/**
-	 * bean异常
-	 * 
-	 * 
-	 *
-	 */
-	public static class BeanException extends Exception {
-
-		public BeanException(String message) {
-			super(message);
-		}
-
-		public BeanException(String message, Throwable cause) {
-			super(message, cause);
-		}
-	}
-
-	/**
-	 * map转bean，调用{@link BeanUtil#map2bean(Map, Object, ParseBeanOptions)}，默认的
-	 * {@link BeanUtil.ParseBeanOptions}
-	 * 
-	 * @param map
-	 * @param bean
-	 * @return 转换后的bean对象
-	 * @throws BeanException
-	 */
-	public static <T> T map2bean(Map<?, ?> map, T bean) throws BeanException {
-		return map2bean(map, bean, null);
-	}
-
-	/**
-	 * map转bean
-	 * 
-	 * @param map
-	 * @param bean
-	 * @param options
-	 *            解析bean的配置项，若为null，则构造一个新的options对象，且TimestampToDate为true
-	 * @return 转换后的bean对象
-	 * @throws BeanException
-	 */
-	public static <T> T map2bean(Map<?, ?> map, T bean, ParseBeanOptions options) throws BeanException {
+	public static <T> T fromMap(Map<?, ?> map, T bean, ParseBeanOptions options) {
 		if (options == null) {
 			options = new ParseBeanOptions();
 		}
@@ -142,7 +38,7 @@ public class BeanUtil {
 		String methodName = null;
 		String key = null;
 		Object value = null;
-		Map<String, Field> fields = getAllFields(bean.getClass());
+		Map<String, Field> fields = BeanUtil.getAllFields(bean.getClass());
 		ParseBeanInterceptor interceptor = options.getInterceptor();
 		int contextDepth = options.contextKeys != null ? options.contextKeys.size() : 0;
 		for (Method method : methods) {
@@ -206,15 +102,15 @@ public class BeanUtil {
 		return bean;
 	}
 
-	public static <T> T jsonString2bean(String s, T bean) throws BeanException {
+	public static <T> T fromJson(String s, T bean) {
 		Map<String, Object> map = JSONUtil.parseJSONObject(s);
 		if (map == null) {
 			throw new BeanException("Failed to parse json string to bean: " + s);
 		}
-		return map2bean(map, bean);
+		return fromMap(map, bean);
 	}
 
-	public static <T> List<T> jsonString2list(String s, Class<T> clazz) throws BeanException {
+	public static <T> List<T> fromJson(String s, Class<T> clazz) {
 		List<?> items = JSONUtil.parseJSONArray(s);
 		if (items == null) {
 			return null;
@@ -228,63 +124,13 @@ public class BeanUtil {
 			} catch (InstantiationException | IllegalAccessException e) {
 				throw new BeanException("Failed to newInstance of " + clazz, e);
 			}
-			bean = BeanUtil.map2bean(jsonObject, bean);
+			bean = fromMap(jsonObject, bean);
 			beans.add(bean);
 		}
 		return beans;
 	}
 
-	/**
-	 * bean转换为序列化的map
-	 * 
-	 * @param bean
-	 * @return map集合
-	 * @throws BeanException
-	 */
-	public static Map<String, Object> bean2serializedMap(Object bean) throws BeanException {
-		Map<String, Object> map = JSONUtil.parseJSONObject(JSONUtil.toJSONString(bean));
-		if (map == null) {
-			throw new BeanException("Failed to call bean2serializedMap");
-		}
-		return map;
-	}
-
-	/**
-	 * 扩展bean
-	 * 
-	 * @param dest
-	 *            bean对象（扩展目标）
-	 * @param src
-	 *            bean对象（扩展源）
-	 * @return bean对象（扩展目标）
-	 * @throws BeanException
-	 */
-	public static <T> T extend(T dest, Object src) throws BeanException {
-		BeanUtil.map2bean(BeanUtil.bean2map(src), dest, null);
-		return dest;
-	}
-
-	/**
-	 * 获取class类的所有属性，包括父类，父类的父类...
-	 * 
-	 * @param clazz
-	 * @return 属性集合
-	 */
-	public static Map<String, Field> getAllFields(Class<?> clazz) {
-		Map<String, Field> fields = new HashMap<String, Field>();
-		getAllFields(clazz, fields);
-		return fields;
-	}
-
-	/**
-	 * bean转换为map
-	 * 
-	 * @param bean
-	 *            实体bean
-	 * @return 转换的map
-	 * @throws BeanException
-	 */
-	public static Map<String, Object> bean2map(Object bean) throws BeanException {
+	public static Map<String, Object> toMap(Object bean) {
 		Map<String, Object> map = new HashMap<String, Object>();
 		Method[] methods = bean.getClass().getMethods();
 		String methodName = null;
@@ -323,6 +169,19 @@ public class BeanUtil {
 			map.put(field, value);
 		}
 		return map;
+	}
+
+	public static Map<String, Object> toSerializedMap(Object bean) {
+		Map<String, Object> map = JSONUtil.parseJSONObject(JSONUtil.toJSONString(bean));
+		if (map == null) {
+			throw new BeanException("Failed to call bean2serializedMap");
+		}
+		return map;
+	}
+
+	public static <T> T extend(T dest, Object src) {
+		fromMap(toMap(src), dest, null);
+		return dest;
 	}
 
 	// ////////////////////////////////////////////////////////////////////////////////////////
@@ -374,11 +233,9 @@ public class BeanUtil {
 	 * @param pType
 	 * @param options
 	 *            解析配置项
-	 * @return 解析后的新对象
-	 * @throws BeanException
+	 * @return 解析后的新对象 @
 	 */
-	public static Object parse(Object raw, Class<?> destClass, ParameterizedType pType, ParseBeanOptions options)
-			throws BeanException {
+	public static Object parse(Object raw, Class<?> destClass, ParameterizedType pType, ParseBeanOptions options) {
 		if (raw == null) {
 			return null;
 		}
@@ -494,11 +351,12 @@ public class BeanUtil {
 			}
 		}
 
-		// bean
+		// raw bean
 		if (destClass.equals(Object.class)) {
 			return raw;
 		}
 
+		// if is bean
 		raw = parseIfIsJSONString(raw);
 		if (Map.class.isAssignableFrom(raw.getClass())) {
 			Object object;
@@ -507,7 +365,7 @@ public class BeanUtil {
 			} catch (Exception e) {
 				throw new BeanException("Failed to create instance of " + destClass, e);
 			}
-			return map2bean((Map<?, ?>) raw, object, options);
+			return fromMap((Map<?, ?>) raw, object, options);
 		}
 
 		return raw;
@@ -524,11 +382,10 @@ public class BeanUtil {
 	 *            解析后的新集合
 	 * @param options
 	 *            解析配置项
-	 * @return 解析后的新集合
-	 * @throws BeanException
+	 * @return 解析后的新集合 @
 	 */
 	private static Object parseCollection(Object raw, Class<?> componentType, Collection<Object> newCollection,
-			ParseBeanOptions options) throws BeanException {
+			ParseBeanOptions options) {
 		if (raw.getClass().isArray()) {
 			int length = Array.getLength(raw);
 			for (int i = 0; i < length; i++) {
@@ -545,7 +402,7 @@ public class BeanUtil {
 			}
 			return newCollection;
 		}
-		throw new IllegalArgumentException("Failed to parseCollection: " + raw.getClass());
+		throw new BeanException("Failed to parseCollection: " + raw.getClass());
 	}
 
 	/**
@@ -557,10 +414,9 @@ public class BeanUtil {
 	 *            需解析成的class
 	 * @param options
 	 *            解析配置项
-	 * @return 解析后的新集合
-	 * @throws BeanException
+	 * @return 解析后的新集合 @
 	 */
-	private static Object parseArray(Object raw, Class<?> componentType, ParseBeanOptions options) throws BeanException {
+	private static Object parseArray(Object raw, Class<?> componentType, ParseBeanOptions options) {
 		if (raw.getClass().isArray()) {
 			int length = Array.getLength(raw);
 			Object newArray = Array.newInstance(componentType, length);
@@ -582,27 +438,7 @@ public class BeanUtil {
 			}
 			return newArray;
 		}
-		throw new IllegalArgumentException("Failed to parseArray: " + raw.getClass());
-	}
-
-	/**
-	 * 获取class的所有属性，若有父类，则加载父类属性，父类的父类...
-	 * 
-	 * @param clazz
-	 *            class类
-	 * @param fieldMap
-	 *            属性map对象
-	 */
-	private static void getAllFields(Class<?> clazz, Map<String, Field> fieldMap) {
-		for (Field field : clazz.getDeclaredFields()) {
-			if (!fieldMap.containsKey(field.getName())) {
-				fieldMap.put(field.getName(), field);
-			}
-		}
-		Class<?> superClass = clazz.getSuperclass();
-		if (superClass != null && superClass != Object.class) {
-			getAllFields(superClass, fieldMap);
-		}
+		throw new BeanException("Failed to parseArray: " + raw.getClass());
 	}
 
 }

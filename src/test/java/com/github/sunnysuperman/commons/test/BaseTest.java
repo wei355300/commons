@@ -21,16 +21,17 @@ public class BaseTest extends TestCase {
 
 		static {
 			try {
-				PropertiesConfig config = new PropertiesConfig(BaseTest.class.getResourceAsStream("conf/db.properties"));
+				PropertiesConfig config = new PropertiesConfig(
+						BaseTest.class.getResourceAsStream("resources/db.properties"));
 				ComboPooledDataSource ds = new com.mchange.v2.c3p0.ComboPooledDataSource();
-				ds.setDriverClass(config.getString("db.driver"));
+				ds.setDriverClass(config.getString("db.driver", "com.mysql.jdbc.Driver"));
 				ds.setJdbcUrl(config.getString("db.url"));
 				ds.setUser(config.getString("db.username"));
 				ds.setPassword(config.getString("db.password"));
 				ds.setMinPoolSize(0);
 				ds.setMaxPoolSize(1);
 				DS = ds;
-				jdbcTemplate = new JdbcTemplate(DS, config.getString("db.type"));
+				jdbcTemplate = new JdbcTemplate(DS, config.getString("db.type", "mysql"));
 			} catch (Exception ex) {
 				LOG.error("Failed to start ConfigDB", ex);
 			}
@@ -56,6 +57,6 @@ public class BaseTest extends TestCase {
 	}
 
 	protected InputStream getResourceAsStream(String fileName) {
-		return BaseTest.class.getResourceAsStream("conf/" + fileName);
+		return BaseTest.class.getResourceAsStream("resources/" + fileName);
 	}
 }

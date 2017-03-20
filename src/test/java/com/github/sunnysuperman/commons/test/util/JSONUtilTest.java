@@ -1,4 +1,4 @@
-package com.github.sunnysuperman.commons.test;
+package com.github.sunnysuperman.commons.test.util;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -7,7 +7,7 @@ import org.junit.Test;
 
 import com.github.sunnysuperman.commons.utils.JSONUtil;
 
-public class JSONTest {
+public class JSONUtilTest {
 
 	@Test
 	public final void testBadString() {

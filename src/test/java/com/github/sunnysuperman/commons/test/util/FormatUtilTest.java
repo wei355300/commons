@@ -1,4 +1,4 @@
-package com.github.sunnysuperman.commons.test;
+package com.github.sunnysuperman.commons.test.util;
 
 import java.util.Calendar;
 import java.util.Date;

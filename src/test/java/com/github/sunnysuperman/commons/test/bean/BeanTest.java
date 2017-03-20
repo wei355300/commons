@@ -1,6 +1,5 @@
-package com.github.sunnysuperman.commons.test;
+package com.github.sunnysuperman.commons.test.bean;
 
-import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
 import java.util.Arrays;
 import java.util.Date;
@@ -11,17 +10,18 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import com.github.sunnysuperman.commons.utils.BeanUtil;
+import com.github.sunnysuperman.commons.bean.Bean;
+import com.github.sunnysuperman.commons.bean.ParseBeanInterceptor;
+import com.github.sunnysuperman.commons.bean.ParseBeanOptions;
+import com.github.sunnysuperman.commons.bean.ParseBeanResult;
+import com.github.sunnysuperman.commons.test.BaseTest;
 import com.github.sunnysuperman.commons.utils.CollectionUtil;
 import com.github.sunnysuperman.commons.utils.FileUtil;
 import com.github.sunnysuperman.commons.utils.FormatUtil;
 import com.github.sunnysuperman.commons.utils.JSONUtil;
 import com.github.sunnysuperman.commons.utils.StringUtil;
-import com.github.sunnysuperman.commons.utils.BeanUtil.ParseBeanInterceptor;
-import com.github.sunnysuperman.commons.utils.BeanUtil.ParseBeanOptions;
-import com.github.sunnysuperman.commons.utils.BeanUtil.ParseBeanResult;
 
-public class BeanUtilTest extends BaseTest {
+public class BeanTest extends BaseTest {
 
 	public static class OSSFile {
 		private String url;
@@ -44,7 +44,7 @@ public class BeanUtilTest extends BaseTest {
 		}
 	}
 
-	public static class Firmware1 implements Serializable {
+	public static class Firmware1 {
 		private Map<String, Integer> extra;
 
 		public Map<String, Integer> getExtra() {
@@ -155,18 +155,7 @@ public class BeanUtilTest extends BaseTest {
 
 	}
 
-	@Test
-	public void testParseValue() throws Exception {
-		String s = FileUtil.read(getResourceAsStream("bean.json"));
-		Firmware2 firmware = BeanUtil.jsonString2bean(s, new Firmware2());
-		System.out.println(firmware.getChildren());
-		System.out.println(JSONUtil.toJSONString(firmware.getChildren()));
-		System.out.println(StringUtil.join(firmware.getArr(), ","));
-		System.out.println(firmware.getExtra());
-	}
-
-	@Test
-	public void testIsJSONString() throws Exception {
+	public void test_IsJSONString() throws Exception {
 		assertTrue(JSONUtil.isJSONString("{}"));
 		assertTrue(JSONUtil.isJSONString("[]"));
 		assertTrue(JSONUtil.isJSONString("[]	"));
@@ -180,8 +169,16 @@ public class BeanUtilTest extends BaseTest {
 		assertFalse(JSONUtil.isJSONString("[]="));
 	}
 
-	@Test
-	public void test_map2bean() throws Exception {
+	public void test_fromJson() throws Exception {
+		String s = FileUtil.read(getResourceAsStream("test.json"));
+		Firmware2 firmware = Bean.fromJson(s, new Firmware2());
+		System.out.println(firmware.getChildren());
+		System.out.println(JSONUtil.toJSONString(firmware.getChildren()));
+		System.out.println(StringUtil.join(firmware.getArr(), ","));
+		System.out.println(firmware.getExtra());
+	}
+
+	public void test_fromMap() throws Exception {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("id", 1);
 		map.put("file", CollectionUtil.arrayAsMap("url", "http://xx", "size", 50));
@@ -201,15 +198,15 @@ public class BeanUtilTest extends BaseTest {
 			}
 
 		};
-		BeanUtil.map2bean(map, new Firmware2(), new ParseBeanOptions().setInterceptor(interceptor));
+		Bean.fromMap(map, new Firmware2(), new ParseBeanOptions().setInterceptor(interceptor));
 	}
 
 	@Test
-	public void testParseDate() throws Exception {
+	public void test_parseDate() throws Exception {
 		Map<String, Object> map = new HashMap<String, Object>();
 		// map.put("f1", String.valueOf("0" + System.currentTimeMillis()));
 		map.put("f1", FormatUtil.formatISO8601Date(new Date()));
-		DateAware bean = BeanUtil.map2bean(map, new DateAware());
+		DateAware bean = Bean.fromMap(map, new DateAware());
 		System.out.println(bean.getF1());
 	}
 }

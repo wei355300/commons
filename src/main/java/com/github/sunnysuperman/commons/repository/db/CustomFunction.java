@@ -1,8 +1,7 @@
 package com.github.sunnysuperman.commons.repository.db;
 
-import java.io.Serializable;
 
-public class CustomFunction implements Serializable {
+public class CustomFunction {
 	private String function;
 	private Object[] params;
 

@@ -1,4 +1,4 @@
-package com.github.sunnysuperman.commons.test;
+package com.github.sunnysuperman.commons.test.task;
 
 import junit.framework.TestCase;
 

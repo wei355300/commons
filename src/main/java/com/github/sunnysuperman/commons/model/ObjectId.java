@@ -1,6 +1,5 @@
 package com.github.sunnysuperman.commons.model;
 
-import java.io.Serializable;
 import java.net.NetworkInterface;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
@@ -50,7 +49,8 @@ import org.slf4j.LoggerFactory;
  *
  * @mongodb.driver.manual core/object-id ObjectId
  */
-public final class ObjectId implements Comparable<ObjectId>, Serializable {
+public final class ObjectId implements Comparable<ObjectId> {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(ObjectId.class);
 
 	// static final Logger LOGGER = Loggers.getLogger("ObjectId");

@@ -1,0 +1,8 @@
+{
+	"id":"",
+	"file":{"url":"","size":"1"},
+	"version":"",
+	"extra":{"imageType":"1"},
+	"arr":["5","89",6],
+	"children":[{"url":"aa","size":"5"},{"url":"bbb","size":17}]
+}
